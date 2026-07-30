@@ -1,0 +1,4 @@
+interface:
+  display_name: "Craft Repository Skill"
+  short_description: "Create a concise repository-aware skill"
+  default_prompt: "Use $craft-repository-skill to create one high-quality skill from repository evidence."

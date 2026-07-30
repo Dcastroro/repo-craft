@@ -1,0 +1,4 @@
+interface:
+  display_name: "Find Skill Opportunities"
+  short_description: "Find high-value skills a repository actually needs"
+  default_prompt: "Use $find-skill-opportunities to identify the few repository skills worth creating."

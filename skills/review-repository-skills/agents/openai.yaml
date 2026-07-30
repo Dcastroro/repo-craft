@@ -1,0 +1,4 @@
+interface:
+  display_name: "Review Repository Skills"
+  short_description: "Review skills for signal, safety, and trigger quality"
+  default_prompt: "Use $review-repository-skills to audit repository skills and reject low-value context."

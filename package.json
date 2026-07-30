@@ -1,0 +1,14 @@
+{
+  "name": "repo-craft-plugin",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint": "node --check scripts/context-debt.mjs",
+    "test": "node --test",
+    "check": "npm run lint && npm test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

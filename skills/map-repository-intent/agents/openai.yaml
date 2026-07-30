@@ -1,0 +1,4 @@
+interface:
+  display_name: "Map Repository Intent"
+  short_description: "Map code, docs, boundaries, and missing context"
+  default_prompt: "Use $map-repository-intent to map the real intent and boundaries of this repository."
