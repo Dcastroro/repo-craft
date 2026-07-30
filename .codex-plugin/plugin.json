@@ -7,6 +7,8 @@
     "email": "117443013+Dcastroro@users.noreply.github.com",
     "url": "https://github.com/Dcastroro"
   },
+  "homepage": "https://github.com/Dcastroro/repo-craft#readme",
+  "repository": "https://github.com/Dcastroro/repo-craft",
   "license": "MIT",
   "keywords": ["repository-intelligence", "skills", "context-engineering", "developer-tools"],
   "skills": "./skills/",

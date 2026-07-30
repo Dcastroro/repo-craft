@@ -32,3 +32,12 @@ npm install
 npm run check
 python3 /path/to/plugin-creator/scripts/validate_plugin.py .
 ```
+
+## Install from source
+
+Clone the repository and add its plugin root to your local Codex plugin
+marketplace or development environment:
+
+```bash
+git clone https://github.com/Dcastroro/repo-craft.git
+```
