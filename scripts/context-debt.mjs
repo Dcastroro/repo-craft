@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { closeSync, constants, existsSync, fstatSync, lstatSync, openSync, readdirSync, readSync } from "node:fs";
+import { closeSync, constants, fstatSync, lstatSync, openSync, readdirSync, readSync } from "node:fs";
 import { basename, join, relative, resolve } from "node:path";
 
 const ignored = new Set([".git", "node_modules", ".next", "dist", "build", "coverage", "vendor"]);
@@ -77,8 +77,16 @@ function readBoundedInstruction(path, byteLimit) {
 
 function analyzeRepository(options) {
   const root = resolve(options.root);
-  if (!existsSync(root)) throw new Error("Repository does not exist.");
-  if (!lstatSync(root).isDirectory()) throw new Error("Repository path is not a directory.");
+  let rootStats;
+  try {
+    rootStats = lstatSync(root);
+  } catch (error) {
+    if (error instanceof Error && "code" in error && error.code === "ENOENT") {
+      throw new Error("Repository does not exist.");
+    }
+    throw new Error("Unable to inspect repository path.");
+  }
+  if (!rootStats.isDirectory()) throw new Error("Repository path is not a directory.");
 
   const files = [];
   function walk(directory, depth) {
