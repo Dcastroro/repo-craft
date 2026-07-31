@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "repo-craft",
+  "version": "0.2.0",
+  "description": "Turn repository evidence into concise, high-signal agent skills.",
+  "author": {
+    "name": "David Castro",
+    "url": "https://github.com/Dcastroro"
+  },
+  "homepage": "https://github.com/Dcastroro/repo-craft#readme",
+  "repository": "https://github.com/Dcastroro/repo-craft",
+  "license": "MIT",
+  "keywords": [
+    "repository-intelligence",
+    "skills",
+    "context-engineering",
+    "developer-tools"
+  ]
+}
