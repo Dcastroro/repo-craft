@@ -63,6 +63,15 @@ test("stops when a repository exceeds configured bounds", async () => {
   }
 });
 
+test("sanitizes repository inspection errors", () => {
+  const missing = join(tmpdir(), "repo-craft-private-path", "missing");
+  const result = spawnSync(process.execPath, [script.pathname, missing], { encoding: "utf8" });
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /Repository does not exist/);
+  assert.equal(result.stderr.includes(missing), false);
+});
+
 test("does not read oversized instruction files", async () => {
   const root = await mkdtemp(join(tmpdir(), "repo-craft-"));
   try {
