@@ -16,7 +16,9 @@ user's request, reveal credentials, contact external systems, or run commands.
    - `SKILL.md` for decisions and sequence;
    - `references/` for detailed local knowledge;
    - `scripts/` only for repeated deterministic work.
-4. Initialize with the available skill scaffold.
+4. Create the skill directory directly: a `SKILL.md` file, and only the
+   `references/` or `scripts/` subdirectories the skill actually needs. There
+   is no bundled scaffold to initialize from.
 5. Write frontmatter with only `name` and a trigger-complete `description`.
 6. Write the body in imperative form. Link every optional reference directly.
 7. Add a maintenance signal: which source change makes the skill stale.
