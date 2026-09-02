@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { closeSync, constants, fstatSync, lstatSync, openSync, readdirSync, readSync } from "node:fs";
-import { basename, join, relative, resolve } from "node:path";
+import { basename, join, relative, resolve, sep } from "node:path";
 
 const ignored = new Set([".git", "node_modules", ".next", "dist", "build", "coverage", "vendor"]);
 const defaults = {
@@ -105,7 +105,7 @@ function analyzeRepository(options) {
         walk(path, depth + 1);
       } else if (entry.isFile()) {
         if (files.length >= options.maxFiles) throw new Error(`File count exceeds the ${options.maxFiles} limit.`);
-        files.push(relative(root, path));
+        files.push(relative(root, path).split(sep).join("/"));
       }
     }
   }
