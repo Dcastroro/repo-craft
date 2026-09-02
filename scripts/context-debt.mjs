@@ -1,10 +1,16 @@
 #!/usr/bin/env node
 
-import { closeSync, constants, fstatSync, lstatSync, openSync, readdirSync, readFileSync, readSync } from "node:fs";
+import { closeSync, constants, fstatSync, lstatSync, openSync, readdirSync, readFileSync, readSync, statSync } from "node:fs";
 import { basename, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const ignored = new Set([".git", "node_modules", ".next", "dist", "build", "coverage", "vendor"]);
+const ignored = new Set([
+  ".git", "node_modules", ".next", "dist", "build", "coverage", "vendor",
+  // Dependency/build caches whose contents are not the repository's own code: left uncounted,
+  // they inflate signals like tests/instructions with vendored files that nobody wrote here
+  // (e.g. a virtualenv's site-packages carrying its own test suite).
+  ".venv", "venv", "__pycache__", "target", ".turbo", ".cache",
+]);
 const defaults = {
   maxDepth: 64,
   maxFiles: 100_000,
@@ -97,7 +103,10 @@ function parseArguments(args) {
       "--max-instruction-bytes": ["maxInstructionBytes", maximums.maxInstructionBytes],
       "--max-total-instruction-bytes": ["maxTotalInstructionBytes", maximums.maxTotalInstructionBytes],
     };
-    if (argument in limits) {
+    // `in` also matches inherited Object.prototype keys ("constructor", "toString",
+    // "hasOwnProperty", "valueOf"...), which a positional repository path can legitimately equal
+    // (a directory literally named "constructor"). Object.hasOwn checks own properties only.
+    if (Object.hasOwn(limits, argument)) {
       const value = args[index + 1];
       if (value === undefined) throw new Error(`${argument} requires a value.`);
       const [name, maximum] = limits[argument];
@@ -152,8 +161,16 @@ const testWordPattern = /\btest(?:s|ing)?\b/i;
 // are complete (or optionally take one) on their own.
 // Arguments use `[ \t]` rather than `\s` so a trailing optional argument
 // never swallows whitespace across a newline into the next line's command.
+// Kept in step with manifestPattern above: Gemfile/pom.xml/composer.json/requirements.txt count
+// as manifests, so their ecosystems' commands (bundle exec, rspec, mvn, gradle, composer,
+// python -m, poetry, uv) must be recognized too, or a repo whose instructions correctly name
+// those commands still gets a false "no-commands" signal.
+// "poetry run" (like "npm run") is listed before the bare "poetry" alternative: regex
+// alternation tries options in order, so the longer prefix must come first or "poetry run
+// pytest" would match only as far as "poetry run", swallowing "run" as if it were poetry's own
+// argument instead of a subcommand with its own argument.
 const commandPattern =
-  /(?:npm run|pnpm|yarn|cargo|npx|make|bun)[ \t]+[\w:.-]+|npm (?:test|ci)\b|go test\b|node --test(?:[ \t]+[\w:.-]+)?|pytest(?:[ \t]+[\w:.-]+)?/g;
+  /(?:npm run|pnpm|yarn|cargo|npx|make|bun|bundle exec|poetry run|gradle|composer|poetry|uv)[ \t]+[\w:.-]+|npm (?:test|ci)\b|go test\b|node --test(?:[ \t]+[\w:.-]+)?|pytest(?:[ \t]+[\w:.-]+)?|rspec(?:[ \t]+[\w:.-]+)?|mvn[ \t]+[\w:.-]+|python -m[ \t]+[\w:.-]+/g;
 
 function readInstructionFile(absolutePath, byteLimit) {
   let descriptor;
@@ -186,7 +203,12 @@ function analyzeRepository(options) {
   const root = resolve(options.root);
   let rootStats;
   try {
-    rootStats = lstatSync(root);
+    // statSync (not lstatSync) on purpose: the root is the path the caller explicitly asked to
+    // scan, not an entry discovered while walking the tree, so following a symlink here (e.g. a
+    // repo checked out through a symlinked path, common on macOS under /tmp or /var) is correct.
+    // Every entry found *during* the walk below still uses lstatSync/isSymbolicLink() and is
+    // skipped rather than followed — that boundary is unrelated to this one.
+    rootStats = statSync(root);
   } catch (error) {
     if (error instanceof Error && "code" in error && error.code === "ENOENT") {
       throw new Error("Repository does not exist.");

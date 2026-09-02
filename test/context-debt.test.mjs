@@ -61,6 +61,39 @@ test("skips symlinks instead of reading content outside the repository", async (
   }
 });
 
+test("resolves a symlinked repository root instead of rejecting it as not a directory", async () => {
+  const target = await mkdtemp(join(tmpdir(), "repo-craft-target-"));
+  const parent = await mkdtemp(join(tmpdir(), "repo-craft-"));
+  const linkPath = join(parent, "linked-root");
+  try {
+    await writeFile(join(target, "AGENTS.md"), "# Rules");
+    // Common on macOS, where /tmp itself is a symlink, and whenever a repository is checked out
+    // through a symlinked path. Statting the root (unlike statting entries found while walking,
+    // which must stay lstat-based to not escape the repository) is meant to follow this.
+    await symlink(target, linkPath, process.platform === "win32" ? "junction" : "dir");
+    const result = runJson(linkPath);
+    assert.equal(result.counts.instructions, 1);
+  } finally {
+    await rm(parent, { recursive: true, force: true });
+    await rm(target, { recursive: true, force: true });
+  }
+});
+
+test("does not count files under .venv, __pycache__, target, .turbo, or .cache", async () => {
+  const root = await mkdtemp(join(tmpdir(), "repo-craft-"));
+  try {
+    await mkdir(join(root, ".venv/lib/site-packages/pkg/tests"), { recursive: true });
+    await writeFile(join(root, ".venv/lib/site-packages/pkg/tests/test_x.py"), "def test_x(): pass");
+    await writeFile(join(root, "AGENTS.md"), "# Rules");
+
+    const result = runJson(root);
+    assert.equal(result.counts.tests, 0);
+    assert.equal(result.counts.files, 1);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
 test("truncates instead of aborting when the file limit is exceeded", async () => {
   const root = await mkdtemp(join(tmpdir(), "repo-craft-"));
   try {
@@ -262,6 +295,35 @@ test("recognizes Makefile, Gemfile, pom.xml, requirements.txt, and composer.json
   }
 });
 
+test("recognizes bundle exec, rspec, mvn, gradle, composer, poetry, and python -m alongside their manifests", async () => {
+  const root = await mkdtemp(join(tmpdir(), "repo-craft-"));
+  try {
+    await writeFile(join(root, "Gemfile"), "");
+    await writeFile(join(root, "pom.xml"), "");
+    await writeFile(
+      join(root, "AGENTS.md"),
+      "# Rules\nRun `bundle exec rspec` and `mvn test` before committing. Also `gradle build`, " +
+        "`composer install`, `poetry run pytest`, and `python -m pytest` for the other services.",
+    );
+
+    const result = runJson(root);
+    assert.deepEqual(
+      [...result.commandsMentioned].sort(),
+      [
+        "bundle exec rspec",
+        "composer install",
+        "gradle build",
+        "mvn test",
+        "poetry run pytest",
+        "python -m pytest",
+      ].sort(),
+    );
+    assert.equal(result.signals.some((signal) => signal.code === "no-commands"), false);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
 test("hidden-tests signal ignores 'latest' and 'contest' as false matches for 'test'", async () => {
   const root = await mkdtemp(join(tmpdir(), "repo-craft-"));
   try {
@@ -351,6 +413,24 @@ test("--version prints the package.json version", () => {
   const result = run(["--version"]);
   assert.equal(result.status, 0);
   assert.match(result.stdout.trim(), /^\d+\.\d+\.\d+$/);
+});
+
+test("accepts a positional repository path equal to an inherited Object.prototype property name", async () => {
+  const parent = await mkdtemp(join(tmpdir(), "repo-craft-"));
+  try {
+    // `"constructor" in limits` (a plain object) is true via the prototype chain even though
+    // "constructor" is never one of limits' own keys — a repository directory that happens to be
+    // named exactly "constructor" (or "toString", "valueOf", "hasOwnProperty"...) must still be
+    // treated as a positional path, not misrouted into the --max-* value-required branch.
+    await mkdir(join(parent, "constructor"));
+    await writeFile(join(parent, "constructor", "AGENTS.md"), "# Rules");
+
+    const result = run(["constructor", "--json"], { cwd: parent });
+    assert.equal(result.status, 0);
+    assert.equal(JSON.parse(result.stdout).repository, "constructor");
+  } finally {
+    await rm(parent, { recursive: true, force: true });
+  }
 });
 
 test("parseArguments rejects an unknown option", () => {
