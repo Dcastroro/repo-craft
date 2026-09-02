@@ -129,7 +129,8 @@ function analyzeRepository(options) {
       return text;
     })
     .join("\n");
-  const commandsMentioned = [...rootText.matchAll(/(?:npm run|pnpm|yarn|cargo|go test|pytest)\s+[\w:.-]+/g)]
+  const commandPattern = /\b(?:npm(?:[ \t]+run)?[ \t]+[\w:.-]+|pnpm[ \t]+[\w:.-]+|yarn[ \t]+[\w:.-]+|cargo[ \t]+[\w:.-]+|go[ \t]+test(?:[ \t]+[\w./-]+)?|pytest(?:[ \t]+[\w./-]+)?)/g;
+  const commandsMentioned = [...rootText.matchAll(commandPattern)]
     .map((match) => match[0]);
   const signals = [
     instructions.length === 0 && { severity: "high", code: "no-instructions", message: "No agent or contributor instructions discovered." },

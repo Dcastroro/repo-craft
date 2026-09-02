@@ -37,6 +37,31 @@ test("finds missing validation commands without reading dependencies", async () 
   }
 });
 
+test("recognizes common direct validation commands", async () => {
+  const root = await mkdtemp(join(tmpdir(), "repo-craft-"));
+  try {
+    await writeFile(join(root, "package.json"), "{}");
+    await writeFile(
+      join(root, "AGENTS.md"),
+      "# Validation\nnpm test\npnpm lint\nyarn typecheck\ncargo test\ngo test ./...\npytest",
+    );
+
+    const output = execFileSync(process.execPath, [script, root, "--json"], { encoding: "utf8" });
+    const result = JSON.parse(output);
+    assert.deepEqual(result.commandsMentioned, [
+      "cargo test",
+      "go test ./...",
+      "npm test",
+      "pnpm lint",
+      "pytest",
+      "yarn typecheck",
+    ]);
+    assert.deepEqual(result.signals, []);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
 test("skips symlinks instead of reading content outside the repository", async () => {
   const root = await mkdtemp(join(tmpdir(), "repo-craft-"));
   const external = await mkdtemp(join(tmpdir(), "repo-craft-external-"));
