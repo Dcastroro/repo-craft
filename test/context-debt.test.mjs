@@ -8,6 +8,15 @@ import test from "node:test";
 
 const script = fileURLToPath(new URL("../scripts/context-debt.mjs", import.meta.url));
 
+test("prints help without inspecting a repository", () => {
+  const result = spawnSync(process.execPath, [script, "--help"], { encoding: "utf8" });
+
+  assert.equal(result.status, 0);
+  assert.match(result.stdout, /Usage: context-debt/);
+  assert.match(result.stdout, /--max-instruction-bytes/);
+  assert.equal(result.stderr, "");
+});
+
 test("finds missing validation commands without reading dependencies", async () => {
   const root = await mkdtemp(join(tmpdir(), "repo-craft-"));
   try {

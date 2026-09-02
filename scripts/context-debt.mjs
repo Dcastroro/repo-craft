@@ -150,7 +150,23 @@ function analyzeRepository(options) {
 }
 
 function main() {
-  const options = parseArguments(process.argv.slice(2));
+  const args = process.argv.slice(2);
+  if (args.includes("--help") || args.includes("-h")) {
+    process.stdout.write([
+      "Usage: context-debt [repository] [options]",
+      "",
+      "Options:",
+      "  --json                         Emit structured JSON output.",
+      "  --max-depth <number>           Limit directory traversal depth.",
+      "  --max-files <number>           Limit files inspected.",
+      "  --max-instruction-bytes <n>    Limit bytes read per instruction file.",
+      "  -h, --help                     Show this help.",
+      "",
+    ].join("\n"));
+    return;
+  }
+
+  const options = parseArguments(args);
   const result = analyzeRepository(options);
   const text = [
     `Context debt: ${result.repository}`,

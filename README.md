@@ -33,6 +33,7 @@ See [SECURITY.md](SECURITY.md) for private vulnerability reporting.
 ```bash
 node scripts/context-debt.mjs /path/to/repository
 node scripts/context-debt.mjs /path/to/repository --json
+node scripts/context-debt.mjs --help
 ```
 
 Default safety limits can be reduced for untrusted or very large repositories:
