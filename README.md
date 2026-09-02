@@ -109,9 +109,13 @@ directory.
 ```bash
 npm ci
 npm run check
-python3 /path/to/plugin-creator/scripts/validate_plugin.py .
 claude plugin validate .
 ```
+
+If you have Anthropic's `plugin-creator` skill checked out locally, its
+`scripts/validate_plugin.py` is a useful additional cross-check; it is not
+vendored in this repository, so there is no fixed path to invoke it from
+here.
 
 CI validates Node.js 20, 22, and 24. Runtime dependencies are intentionally
 avoided.
