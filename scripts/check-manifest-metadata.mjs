@@ -11,11 +11,15 @@
 // `description` are expected to match across all four files.
 
 import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
-const rootDir = join(scriptDir, "..");
+// Accepts an optional repository root argument (defaulting to this script's
+// own repository) so tests can point the real script at disposable fixture
+// directories instead of duplicating it, keeping test-coverage instrumentation
+// attributed to this file.
+const rootDir = process.argv[2] ? resolve(process.argv[2]) : join(scriptDir, "..");
 
 function readJson(relativePath) {
   const fullPath = join(rootDir, relativePath);

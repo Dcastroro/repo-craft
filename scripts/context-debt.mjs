@@ -2,6 +2,7 @@
 
 import { closeSync, constants, fstatSync, lstatSync, openSync, readdirSync, readFileSync, readSync } from "node:fs";
 import { basename, join, relative, resolve, sep } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const ignored = new Set([".git", "node_modules", ".next", "dist", "build", "coverage", "vendor"]);
 const defaults = {
@@ -353,12 +354,19 @@ function main() {
   process.stdout.write(options.json ? `${JSON.stringify(result, null, 2)}\n` : `${text}\n`);
 }
 
-try {
-  main();
-} catch (error) {
-  const message = error instanceof Error ? error.message : "Unknown failure.";
-  process.stderr.write(`context-debt: ${message}\n`);
-  process.exitCode = 1;
+// Guard the CLI entry point so this module can be imported (e.g. from
+// tests, to exercise internal helpers directly) without triggering a real
+// scan of the importing process's working directory as a side effect.
+const isMainModule = process.argv[1] !== undefined && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+
+if (isMainModule) {
+  try {
+    main();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown failure.";
+    process.stderr.write(`context-debt: ${message}\n`);
+    process.exitCode = 1;
+  }
 }
 
-export { parsePositiveInteger, toPosixPath, isInstructionPath };
+export { parsePositiveInteger, toPosixPath, isInstructionPath, readInstructionFile };

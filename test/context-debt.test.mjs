@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { basename, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
+import { readInstructionFile } from "../scripts/context-debt.mjs";
 
 // `fileURLToPath` (not `url.pathname`) is required for cross-platform
 // correctness: on Windows, a file URL's `.pathname` keeps a leading slash
@@ -382,4 +383,31 @@ test("parseArguments rejects a value above the configured maximum", () => {
   const result = run(["--max-depth", "99999"]);
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /--max-depth cannot exceed/);
+});
+
+test("parseArguments rejects zero, which is digits-only but not a positive integer", () => {
+  // "0" passes the /^\d+$/ shape check but fails the `parsed < 1` guard, a
+  // branch distinct from both the shape check and the maximum check.
+  const result = run(["--max-files", "0"]);
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /--max-files must be a positive integer/);
+});
+
+test("readInstructionFile reports a non-regular file (e.g. a directory) as unreadable", async () => {
+  const root = await mkdtemp(join(tmpdir(), "repo-craft-"));
+  try {
+    // A directory happens to share a name with an expected instruction
+    // file. `readdirSync`/`walk` never lets a directory reach this
+    // function in normal operation, so this exercises the defensive
+    // `!stats.isFile()` branch directly via the exported helper.
+    await mkdir(join(root, "AGENTS.md"));
+
+    const result = readInstructionFile(join(root, "AGENTS.md"), 1_048_576);
+    assert.equal(result.status, "unreadable");
+    assert.equal(result.bytes, 0);
+    assert.equal(result.text, "");
+    assert.equal(result.reason, "Not a regular file.");
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
 });
