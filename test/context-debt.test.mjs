@@ -152,7 +152,14 @@ test("distinguishes oversized instruction files from unreadable ones", async () 
   }
 });
 
-test("reports unreadable instruction files distinctly from oversized ones", async () => {
+test("reports unreadable instruction files distinctly from oversized ones", async (t) => {
+  // chmod 0o000 does not reliably block reads for the file's owner on Windows (it only toggles
+  // the read-only attribute, not POSIX-style permission bits), so this simulated-unreadable
+  // scenario is skipped there rather than asserting on flaky behavior.
+  if (process.platform === "win32") {
+    t.skip("chmod does not reliably simulate an unreadable file on Windows");
+    return;
+  }
   const root = await mkdtemp(join(tmpdir(), "repo-craft-"));
   try {
     await writeFile(join(root, "AGENTS.md"), "# Rules");
@@ -175,7 +182,13 @@ test("reports unreadable instruction files distinctly from oversized ones", asyn
   }
 });
 
-test("continues the scan past an unreadable directory instead of aborting", async () => {
+test("continues the scan past an unreadable directory instead of aborting", async (t) => {
+  // See the comment in the previous test: chmod 0o000 does not reliably simulate an unreadable
+  // path on Windows.
+  if (process.platform === "win32") {
+    t.skip("chmod does not reliably simulate an unreadable directory on Windows");
+    return;
+  }
   const root = await mkdtemp(join(tmpdir(), "repo-craft-"));
   try {
     await mkdir(join(root, "locked"));
