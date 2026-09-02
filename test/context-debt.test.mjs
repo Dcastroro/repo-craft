@@ -37,6 +37,26 @@ test("finds missing validation commands without reading dependencies", async () 
   }
 });
 
+test("ignores common generated dependency and cache trees", async () => {
+  const root = await mkdtemp(join(tmpdir(), "repo-craft-"));
+  try {
+    for (const directory of [".cache", ".turbo", ".venv", "__pycache__", "target"]) {
+      await mkdir(join(root, directory, "nested"), { recursive: true });
+      await writeFile(join(root, directory, "nested/generated.test.js"), "export {};");
+      await writeFile(join(root, directory, "nested/package.json"), "{}");
+    }
+    await writeFile(join(root, "AGENTS.md"), "# Repository rules");
+
+    const output = execFileSync(process.execPath, [script, root, "--json"], { encoding: "utf8" });
+    const result = JSON.parse(output);
+    assert.equal(result.counts.files, 1);
+    assert.equal(result.counts.manifests, 0);
+    assert.equal(result.counts.tests, 0);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
 test("skips symlinks instead of reading content outside the repository", async () => {
   const root = await mkdtemp(join(tmpdir(), "repo-craft-"));
   const external = await mkdtemp(join(tmpdir(), "repo-craft-external-"));

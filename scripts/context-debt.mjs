@@ -3,7 +3,20 @@
 import { closeSync, constants, fstatSync, lstatSync, openSync, readdirSync, readSync } from "node:fs";
 import { basename, join, relative, resolve, sep } from "node:path";
 
-const ignored = new Set([".git", "node_modules", ".next", "dist", "build", "coverage", "vendor"]);
+const ignored = new Set([
+  ".cache",
+  ".git",
+  ".next",
+  ".turbo",
+  ".venv",
+  "__pycache__",
+  "build",
+  "coverage",
+  "dist",
+  "node_modules",
+  "target",
+  "vendor",
+]);
 const defaults = {
   maxDepth: 64,
   maxFiles: 100_000,
