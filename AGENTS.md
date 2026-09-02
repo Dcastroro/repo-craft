@@ -30,7 +30,10 @@ Claude Code, and Google Antigravity.
 
 ```bash
 npm run check
-python3 /path/to/skill-creator/scripts/quick_validate.py skills/<name>
-python3 /path/to/plugin-creator/scripts/validate_plugin.py .
 claude plugin validate .
 ```
+
+If you have Anthropic's `skill-creator` and `plugin-creator` skills checked
+out locally, their `quick_validate.py` and `validate_plugin.py` are useful
+additional cross-checks; neither is vendored in this repository, so there
+is no fixed path to invoke them from here (see README.md).

@@ -3,7 +3,9 @@ name: CI
 on:
   push:
     branches: [main]
+    paths-ignore: ["**.md", "assets/**"]
   pull_request:
+    paths-ignore: ["**.md", "assets/**"]
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -30,4 +32,6 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: npm
       - run: npm ci --ignore-scripts
+      # `npm run check` already runs check:manifests (see package.json) as its second step; a
+      # separate explicit step here duplicated that same check on every run for no added signal.
       - run: npm run check
