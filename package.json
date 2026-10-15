@@ -1,6 +1,6 @@
 {
   "name": "repo-craft-plugin",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Turn repository evidence into concise, high-signal agent skills.",
   "private": true,
   "type": "module",
@@ -8,9 +8,12 @@
     "lint": "node --check scripts/context-debt.mjs && node --check scripts/check-manifest-metadata.mjs",
     "test": "node --test",
     "check:manifests": "node scripts/check-manifest-metadata.mjs",
-    "check": "npm run lint && npm run check:manifests && npm test"
+    "check": "npm run lint && npm run check:manifests && npm test",
+    "repo:check": "node scripts/repository-check.mjs",
+    "release:build": "node scripts/build-release.mjs"
   },
   "engines": {
     "node": ">=20"
-  }
+  },
+  "license": "MIT"
 }
