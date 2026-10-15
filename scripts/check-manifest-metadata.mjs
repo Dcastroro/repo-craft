@@ -26,35 +26,38 @@ function readJson(relativePath) {
   return { path: relativePath, data: JSON.parse(readFileSync(fullPath, "utf8")) };
 }
 
-const packageJson = readJson("package.json");
-const pluginManifests = [
-  readJson(".claude-plugin/plugin.json"),
-  readJson(".codex-plugin/plugin.json"),
-  readJson("plugin.json"),
-];
+function main() {
+  const packageJson = readJson("package.json");
+  const pluginManifests = [
+    readJson(".claude-plugin/plugin.json"),
+    readJson(".codex-plugin/plugin.json"),
+    readJson("plugin.json"),
+  ];
 
-const errors = [];
+  const errors = [];
 
-function assertFieldMatches(field, sources) {
-  const [first, ...rest] = sources;
-  for (const source of rest) {
-    if (source.data[field] !== first.data[field]) {
-      errors.push(
-        `${field} mismatch: ${first.path} has ${JSON.stringify(first.data[field])}, ` +
-          `${source.path} has ${JSON.stringify(source.data[field])}.`,
-      );
+  function assertFieldMatches(field, sources) {
+    const [first, ...rest] = sources;
+    for (const source of rest) {
+      if (source.data[field] !== first.data[field]) {
+        errors.push(
+          `${field} mismatch between metadata sources.`,
+        );
+      }
     }
   }
-}
 
-assertFieldMatches("name", pluginManifests);
-assertFieldMatches("version", [packageJson, ...pluginManifests]);
-assertFieldMatches("description", [packageJson, ...pluginManifests]);
+  assertFieldMatches("name", pluginManifests);
+  assertFieldMatches("version", [packageJson, ...pluginManifests]);
+  assertFieldMatches("description", [packageJson, ...pluginManifests]);
 
-if (errors.length > 0) {
-  process.stderr.write("Plugin metadata is out of sync:\n");
-  for (const error of errors) process.stderr.write(`  - ${error}\n`);
-  process.exitCode = 1;
-} else {
-  process.stdout.write("Plugin metadata matches across package.json and all plugin manifests.\n");
+  if (errors.length > 0) {
+    process.stderr.write("Plugin metadata is out of sync:\n");
+    for (const error of errors) process.stderr.write(`  - ${error}\n`);
+    process.exitCode = 1;
+  } else {
+    process.stdout.write("Plugin metadata matches across package.json and all plugin manifests.\n");
+  }
 }
+try { main(); }
+catch { process.stderr.write("Unable to validate plugin metadata.\n"); process.exitCode = 1; }
