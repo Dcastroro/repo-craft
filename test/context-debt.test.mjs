@@ -45,12 +45,20 @@ test("finds missing validation commands without reading dependencies", async () 
   }
 });
 
-test("skips symlinks instead of reading content outside the repository", async () => {
+test("skips symlinks instead of reading content outside the repository", async (t) => {
   const root = await mkdtemp(join(tmpdir(), "repo-craft-"));
   const external = await mkdtemp(join(tmpdir(), "repo-craft-external-"));
   try {
     await writeFile(join(external, "CLAUDE.md"), "npm run exfiltrate");
-    await symlink(join(external, "CLAUDE.md"), join(root, "CLAUDE.md"));
+    try {
+      await symlink(join(external, "CLAUDE.md"), join(root, "CLAUDE.md"));
+    } catch (error) {
+      if (process.platform === "win32" && ["EPERM", "EACCES"].includes(error.code)) {
+        t.skip("Creating file symlinks requires additional Windows privileges");
+        return;
+      }
+      throw error;
+    }
 
     const result = runJson(root);
     assert.equal(result.counts.instructions, 0);

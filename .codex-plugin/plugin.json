@@ -1,6 +1,6 @@
 {
   "name": "repo-craft",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Turn repository evidence into concise, high-signal agent skills.",
   "author": {
     "name": "David Castro",
@@ -9,7 +9,12 @@
   "homepage": "https://github.com/Dcastroro/repo-craft#readme",
   "repository": "https://github.com/Dcastroro/repo-craft",
   "license": "MIT",
-  "keywords": ["repository-intelligence", "skills", "context-engineering", "developer-tools"],
+  "keywords": [
+    "repository-intelligence",
+    "skills",
+    "context-engineering",
+    "developer-tools"
+  ],
   "skills": "./skills/",
   "interface": {
     "displayName": "Repo Craft",
@@ -17,7 +22,10 @@
     "longDescription": "Map repository intent, find context debt, craft focused skills, and reject low-value agent instructions.",
     "developerName": "David Castro",
     "category": "Productivity",
-    "capabilities": ["Read", "Write"],
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
     "defaultPrompt": [
       "Map this repository before I change it.",
       "Find the skills this repository actually needs.",

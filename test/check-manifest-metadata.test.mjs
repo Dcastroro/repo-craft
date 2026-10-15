@@ -60,7 +60,7 @@ test("fails when a plugin manifest's version drifts from package.json", async ()
     const result = run(root);
     assert.notEqual(result.status, 0);
     assert.match(result.stderr, /Plugin metadata is out of sync:/);
-    assert.match(result.stderr, /version mismatch: package\.json has "0\.2\.0", \.codex-plugin\/plugin\.json has "0\.3\.0"/);
+    assert.match(result.stderr, /version mismatch between metadata sources/);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
@@ -76,7 +76,7 @@ test("fails when a plugin manifest's description drifts from package.json", asyn
     assert.match(result.stderr, /Plugin metadata is out of sync:/);
     assert.match(
       result.stderr,
-      /description mismatch: package\.json has "Turn repository evidence into concise, high-signal agent skills\.", plugin\.json has "Something else entirely\."/,
+      /description mismatch between metadata sources/,
     );
   } finally {
     await rm(root, { recursive: true, force: true });
@@ -95,7 +95,7 @@ test("fails when the plugin id (name) diverges across the three plugin manifests
     assert.match(result.stderr, /Plugin metadata is out of sync:/);
     assert.match(
       result.stderr,
-      /name mismatch: \.claude-plugin\/plugin\.json has "repo-craft", \.codex-plugin\/plugin\.json has "repo-craft-codex"/,
+      /name mismatch between metadata sources/,
     );
   } finally {
     await rm(root, { recursive: true, force: true });
@@ -142,4 +142,14 @@ test("reports multiple mismatches at once rather than stopping at the first", as
   } finally {
     await rm(root, { recursive: true, force: true });
   }
+});
+
+test("mismatch diagnostics omit private metadata values", async () => {
+  const sentinel = "PRIVATE_METADATA_SENTINEL_14a9";
+  const root = await makeFixture({ rootPlugin: { ...basePluginManifest, description: sentinel } });
+  try {
+    const result = run(root);
+    assert.notEqual(result.status, 0);
+    assert.equal((result.stdout + result.stderr).includes(sentinel), false);
+  } finally { await rm(root, { recursive: true, force: true }); }
 });

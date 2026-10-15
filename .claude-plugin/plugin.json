@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "repo-craft",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Turn repository evidence into concise, high-signal agent skills.",
   "author": {
     "name": "David Castro",

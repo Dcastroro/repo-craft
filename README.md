@@ -119,3 +119,9 @@ here.
 
 CI validates Node.js 20, 22, and 24. Runtime dependencies are intentionally
 avoided.
+
+## Repository and release checks
+
+Run `npm run repo:check` before committing. Source releases are built from a
+clean, tested tag and include a checksum and commit manifest. See
+[RELEASING.md](RELEASING.md) for validation, publication and maintenance.
