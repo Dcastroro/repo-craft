@@ -115,7 +115,8 @@ function parseArguments(args) {
       continue;
     }
 
-    if (argument.startsWith("-")) throw new Error(`Unknown option: ${argument}`);
+    // Unknown arguments can contain private values or terminal control characters.
+    if (argument.startsWith("-")) throw new Error("Unknown option. Use --help for supported options.");
     if (rootWasSet) throw new Error("Provide only one repository path.");
     options.root = argument;
     rootWasSet = true;

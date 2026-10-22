@@ -26,6 +26,8 @@ limits.
 
 The scanner reports a repository label rather than an absolute local path. It
 never prints instruction-file contents, credentials, or environment values.
+Unknown-option errors omit the supplied argument and point to `--help`, so
+accidental private values and terminal control characters are not copied into logs.
 See [SECURITY.md](SECURITY.md) for private vulnerability reporting.
 
 ## Context-debt scanner
