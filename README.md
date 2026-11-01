@@ -57,8 +57,16 @@ analyzed.
 Detected instructions include root-level `AGENTS.md`, `CLAUDE.md`,
 `CONTRIBUTING.md`, `SECURITY.md`, `GEMINI.md`, `.cursorrules`, and
 `.github/copilot-instructions.md`, plus `AGENTS.md`/`CLAUDE.md` nested one or
-two directories deep (for monorepo packages, e.g. `packages/app/AGENTS.md`)
-and every file under `.claude/rules/`. `.claude/rules/` files are counted
+two directories deep (for monorepo packages, e.g. `packages/app/AGENTS.md`),
+every file under `.claude/rules/`, and `*.instructions.md` files within
+`.github/instructions/`, including nested folders. Copilot's scoped instruction
+files use the same bounded reads, size budgets and command/test-workflow
+signals as other instruction files. Unrelated Markdown files in that directory
+are not counted. Detection inventories potential context; it does not evaluate
+`applyTo` patterns or prove that Copilot loaded a file for a particular task.
+See [GitHub's instruction format](https://docs.github.com/en/copilot/concepts/prompting-and-context/custom-instructions).
+
+`.claude/rules/` files are counted
 *and* read like every other instruction file — earlier versions counted them
 but silently excluded their content from the command/test-workflow signals,
 which under-reported real context debt for repositories that rely on them.

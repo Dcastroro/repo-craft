@@ -135,6 +135,8 @@ const rootInstructionNames = new Set([
   ".cursorrules",
 ]);
 const specialInstructionPaths = new Set([".github/copilot-instructions.md"]);
+// Copilot path-specific instructions can be organized in subdirectories.
+const scopedCopilotPattern = /^\.github\/instructions\/(?:[^/]+\/)*[^/]+\.instructions\.md$/;
 // Monorepo package instructions, e.g. "packages/app/AGENTS.md" or
 // "apps/AGENTS.md". Excluded from the dot-prefixed segment so tool
 // directories (.claude, .github, .vscode, ...) are never mistaken for
@@ -143,6 +145,7 @@ const nestedInstructionPattern = /^(?!\.)[^/]+(?:\/[^/]+)?\/(?:AGENTS|CLAUDE)\.m
 
 function isInstructionPath(path) {
   if (specialInstructionPaths.has(path)) return true;
+  if (scopedCopilotPattern.test(path)) return true;
   if (path.startsWith(".claude/rules/")) return true;
   if (!path.includes("/")) return rootInstructionNames.has(path);
   return nestedInstructionPattern.test(path);
