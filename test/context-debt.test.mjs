@@ -457,7 +457,7 @@ test("accepts a positional repository path equal to an inherited Object.prototyp
 test("parseArguments rejects an unknown option", () => {
   const result = run(["--nope"]);
   assert.notEqual(result.status, 0);
-  assert.match(result.stderr, /Unknown option: --nope/);
+  assert.equal(result.stderr, "context-debt: Unknown option. Use --help for supported options.\n");
 });
 
 test("parseArguments rejects more than one repository path", () => {
