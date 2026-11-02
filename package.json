@@ -5,7 +5,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "lint": "node --check scripts/context-debt.mjs && node --check scripts/check-manifest-metadata.mjs",
+    "lint": "node --check scripts/context-debt.mjs && node --check scripts/check-manifest-metadata.mjs && node --check scripts/repository-check.mjs && node --check scripts/build-release.mjs",
     "test": "node --test",
     "check:manifests": "node scripts/check-manifest-metadata.mjs",
     "check": "npm run lint && npm run check:manifests && npm test",
